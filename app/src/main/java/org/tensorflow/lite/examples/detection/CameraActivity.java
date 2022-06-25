@@ -19,6 +19,7 @@ package org.tensorflow.lite.examples.detection;
 import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.hardware.Camera;
@@ -26,6 +27,8 @@ import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.location.Location;
+import android.location.LocationManager;
 import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
@@ -34,11 +37,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Trace;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 
+import android.provider.Settings;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
@@ -52,6 +58,13 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.io.IOException;
@@ -91,6 +104,8 @@ public abstract class CameraActivity extends AppCompatActivity
   private LinearLayout bottomSheetLayout;
   private LinearLayout gestureLayout;
   private BottomSheetBehavior<LinearLayout> sheetBehavior;
+  private FusedLocationProviderClient fusedLocationProviderClient;
+
 
   protected TextView frameValueTextView, cropValueTextView, inferenceTimeTextView;
   protected ImageView bottomSheetArrowImageView;
@@ -220,9 +235,76 @@ public abstract class CameraActivity extends AppCompatActivity
 
     plusImageView.setOnClickListener(this);
     minusImageView.setOnClickListener(this);
+//    this.getLoc();
   }
 
+  public void getLoc() {
+    LOGGER.i("&&&&&&&&&&!!!!!!!!!!!!@@@@@@@@@@@################$$$$$$$$$$$$$$$$$(((((((((((((");
+    if(ActivityCompat.checkSelfPermission(CameraActivity.this
+            , Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(CameraActivity.this
+            , Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+      getCurrentLocation();
+    } else {
+      ActivityCompat.requestPermissions(CameraActivity.this
+              , new String[]{Manifest.permission.ACCESS_FINE_LOCATION
+                      , Manifest.permission.ACCESS_COARSE_LOCATION}
+              , 100);
+    }
+  }
 
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+    if(requestCode == 100 && grantResults.length > 0 && (grantResults[0] + grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
+      getCurrentLocation();
+    }
+    else {
+      Toast.makeText(getApplicationContext(), "Permission denied.", Toast.LENGTH_SHORT).show();
+    }
+  }
+
+  public void getCurrentLocation() {
+    LocationManager locationManager = (LocationManager) getSystemService(
+            Context.LOCATION_SERVICE
+    );
+
+    if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+
+      fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+        @Override
+        public void onComplete(@NonNull Task<Location> task) {
+          Location location = task.getResult();
+
+          if(location != null) {
+            LOGGER.i("*************" + location.getLatitude());
+            LOGGER.i("*************" + location.getLongitude());
+          } else {
+            LocationRequest locationRequest = new LocationRequest()
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                    .setInterval(10000)
+                    .setFastestInterval(1000)
+                    .setNumUpdates(1);
+            LocationCallback locationCallback = new LocationCallback() {
+              @Override
+              public void onLocationResult(@NonNull LocationResult locationResult) {
+                Location location1 = locationResult.getLastLocation();
+                LOGGER.i("*************" + location1.getLatitude());
+                LOGGER.i("*************" + location1.getLongitude());
+              }
+            };
+
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest
+                    , locationCallback, Looper.myLooper());
+          }
+        }
+      });
+    } else {
+      startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+              .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+  }
 
   protected ArrayList<String> getModelStrings(AssetManager mgr, String path){
     ArrayList<String> res = new ArrayList<String>();
@@ -414,18 +496,18 @@ public abstract class CameraActivity extends AppCompatActivity
     }
   }
 
-  @Override
-  public void onRequestPermissionsResult(
-      final int requestCode, final String[] permissions, final int[] grantResults) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    if (requestCode == PERMISSIONS_REQUEST) {
-      if (allPermissionsGranted(grantResults)) {
-        setFragment();
-      } else {
-        requestPermission();
-      }
-    }
-  }
+//  @Override
+//  public void onRequestPermissionsResult(
+//      final int requestCode, final String[] permissions, final int[] grantResults) {
+//    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//    if (requestCode == PERMISSIONS_REQUEST) {
+//      if (allPermissionsGranted(grantResults)) {
+//        setFragment();
+//      } else {
+//        requestPermission();
+//      }
+//    }
+//  }
 
   private static boolean allPermissionsGranted(final int[] grantResults) {
     for (int result : grantResults) {

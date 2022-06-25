@@ -18,6 +18,12 @@ package org.tensorflow.lite.examples.detection;
 
 import static android.content.ContentValues.TAG;
 
+import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -27,19 +33,38 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.ImageReader.OnImageAvailableListener;
+import android.os.Bundle;
+import android.os.Looper;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.tensorflow.lite.examples.detection.customview.OverlayView;
@@ -51,7 +76,7 @@ import org.tensorflow.lite.examples.detection.tflite.Classifier;
 import org.tensorflow.lite.examples.detection.tflite.DetectorFactory;
 import org.tensorflow.lite.examples.detection.tflite.YoloV5Classifier;
 import org.tensorflow.lite.examples.detection.tracking.MultiBoxTracker;
-
+import org.tensorflow.lite.examples.detection.MainActivity;
 /**
  * An activity that uses a TensorFlowMultiBoxDetector and ObjectTracker to detect and then track
  * objects.
@@ -65,6 +90,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 640);
     private static final boolean SAVE_PREVIEW_BITMAP = false;
     private static final float TEXT_SIZE_DIP = 10;
+    // The minimum distance to change Updates in meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
+
+    // The minimum time between updates in milliseconds
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+
     OverlayView trackingOverlay;
     private Integer sensorOrientation;
 
@@ -85,6 +116,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private MultiBoxTracker tracker;
 
     private BorderedText borderedText;
+
+
 
     @Override
     public void onPreviewSizeChosen(final Size size, final int rotation) {
@@ -219,12 +252,31 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     }
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-
+    public List<Address> addresses = null;
     void logtoDatabase(Classifier.Recognition result) {
+
         if (result.getConfidence() > 0.5) {
             Map<String, Object> damage = new HashMap<>();
             damage.put("Label", result.getDetectedClass());
             damage.put("Confidence", 100 * result.getConfidence());
+
+            try {
+                Geocoder geocoder = new Geocoder(DetectorActivity.this
+                        , Locale.getDefault());
+                List<Address> addresses = geocoder.getFromLocation(
+                        MainActivity.latitude, MainActivity.longitude, 1
+                );
+                Address address = addresses.get(0);
+                damage.put("Latitude", MainActivity.latitude);
+                damage.put("Longitude", MainActivity.longitude);
+                damage.put("Country", address.getCountryName());
+                damage.put("Locality", address.getLocality());
+                damage.put("Postal Code", address.getPostalCode());
+                damage.put("Address Line", address.getAddressLine(0));
+//                LOGGER.i(address.toString());
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
 
             db.collection("Damages")
                     .add(damage)
