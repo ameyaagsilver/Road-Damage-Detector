@@ -27,6 +27,10 @@ import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.TypedValue;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -121,6 +125,10 @@ public class MultiBoxTracker {
   }
 
   public synchronized void draw(final Canvas canvas) {
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference("message");
+
+    myRef.setValue("Hello, World!");
     final boolean rotated = sensorOrientation % 180 == 90;
     final float multiplier =
             Math.min(

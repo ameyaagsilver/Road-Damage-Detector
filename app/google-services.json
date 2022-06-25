@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "624892230032",
+    "firebase_url": "https://road-damage-detector-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "road-damage-detector",
+    "storage_bucket": "road-damage-detector.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:624892230032:android:a8c7f52cd5fd1c0a61db15",
+        "android_client_info": {
+          "package_name": "org.tensorflow.lite.examples.detection"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "624892230032-jadgt7b1e353pnl67bb3vr5379b5p9i6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8Z9IvXt12OQplA2xqYGkMZqy86pbki1w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "624892230032-jadgt7b1e353pnl67bb3vr5379b5p9i6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
