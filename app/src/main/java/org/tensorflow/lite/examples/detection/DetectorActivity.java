@@ -16,6 +16,8 @@
 
 package org.tensorflow.lite.examples.detection;
 
+import static android.content.ContentValues.TAG;
+
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -32,9 +34,13 @@ import android.util.Size;
 import android.util.TypedValue;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.tensorflow.lite.examples.detection.customview.OverlayView;
 import org.tensorflow.lite.examples.detection.customview.OverlayView.DrawCallback;
@@ -212,6 +218,21 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         });
     }
 
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    void logtoDatabase(Classifier.Recognition result) {
+        if (result.getConfidence() > 0.5) {
+            Map<String, Object> damage = new HashMap<>();
+            damage.put("Label", result.getDetectedClass());
+            damage.put("Confidence", 100 * result.getConfidence());
+
+            db.collection("Damages")
+                    .add(damage)
+                    .addOnSuccessListener(documentReference -> Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId()))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
+        }
+    }
+
     @Override
     protected void processImage() {
         ++timestamp;
@@ -236,6 +257,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         if (SAVE_PREVIEW_BITMAP) {
             ImageUtils.saveBitmap(croppedBitmap);
         }
+
 
         runInBackground(
                 new Runnable() {
@@ -265,9 +287,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                         final List<Classifier.Recognition> mappedRecognitions =
                                 new LinkedList<Classifier.Recognition>();
 
+
+
                         for (final Classifier.Recognition result : results) {
                             final RectF location = result.getLocation();
                             if (location != null && result.getConfidence() >= minimumConfidence) {
+                                logtoDatabase(result);
                                 canvas.drawRect(location, paint);
 
                                 cropToFrameTransform.mapRect(location);

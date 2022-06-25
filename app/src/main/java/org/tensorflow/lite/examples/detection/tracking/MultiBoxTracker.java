@@ -15,6 +15,8 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.detection.tracking;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -25,10 +27,21 @@ import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import org.tensorflow.lite.examples.detection.env.BorderedText;
 import org.tensorflow.lite.examples.detection.env.ImageUtils;
@@ -121,6 +134,8 @@ public class MultiBoxTracker {
   }
 
   public synchronized void draw(final Canvas canvas) {
+
+
     final boolean rotated = sensorOrientation % 180 == 90;
     final float multiplier =
             Math.min(
@@ -147,8 +162,7 @@ public class MultiBoxTracker {
               !TextUtils.isEmpty(recognition.title)
                       ? String.format("%s %.2f", recognition.title, (100 * recognition.detectionConfidence))
                       : String.format("%.2f", (100 * recognition.detectionConfidence));
-      //            borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.top,
-      // labelString);
+
       borderedText.drawText(
               canvas, trackedPos.left + cornerSize, trackedPos.top, labelString + "%", boxPaint);
     }
@@ -196,6 +210,7 @@ public class MultiBoxTracker {
 //      trackedRecognition.color = COLORS[trackedObjects.size() % COLORS.length];
       trackedRecognition.color = COLORS[potential.second.getDetectedClass() % COLORS.length];
       trackedObjects.add(trackedRecognition);
+
 
 //      if (trackedObjects.size() >= COLORS.length) {
 //        break;
