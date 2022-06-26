@@ -17,7 +17,8 @@
 package org.tensorflow.lite.examples.detection;
 
 import static android.content.ContentValues.TAG;
-
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.app.Activity;
@@ -273,6 +274,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 damage.put("Locality", address.getLocality());
                 damage.put("Postal Code", address.getPostalCode());
                 damage.put("Address Line", address.getAddressLine(0));
+                damage.put("TimeStamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar
+                        .getInstance().getTime()));
 //                LOGGER.i(address.toString());
             } catch(IOException e) {
                 e.printStackTrace();

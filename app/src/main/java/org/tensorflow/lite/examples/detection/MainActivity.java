@@ -31,6 +31,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -49,6 +50,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     public static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.15f;
+    public static final int PRIORITY_HIGH_ACCURACY = 100;
     public static double latitude;
     public static double longitude;
     FusedLocationProviderClient fusedLocationProviderClient;
@@ -130,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
             || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
 
-            fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+            fusedLocationProviderClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, null).addOnCompleteListener(new OnCompleteListener<Location>() {
                 @Override
                 public void onComplete(@NonNull Task<Location> task) {
                     Location location = task.getResult();
@@ -142,14 +144,15 @@ public class MainActivity extends AppCompatActivity {
                         latitude = location.getLatitude();
                     } else {
                         LocationRequest locationRequest = new LocationRequest()
-                                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                                .setInterval(10000)
-                                .setFastestInterval(1000)
-                                .setNumUpdates(1);
+                                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                                .setInterval(100)
+                                .setFastestInterval(10)
+                                .setNumUpdates(3);
                         LocationCallback locationCallback = new LocationCallback() {
                             @Override
                             public void onLocationResult(@NonNull LocationResult locationResult) {
                                 Location location1 = locationResult.getLastLocation();
+
                                 LOGGER.i("*************" + location1.getLatitude());
                                 LOGGER.i("*************" + location1.getLongitude());
                                 longitude = location1.getLongitude();
