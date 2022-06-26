@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             }).start();
 
         });
-        this.sourceBitmap = Utils.getBitmapFromAsset(MainActivity.this, "kite.jpg");
+        this.sourceBitmap = Utils.getBitmapFromAsset(MainActivity.this, "damage.jpg");
 
         this.cropBitmap = Utils.processBitmap(sourceBitmap, TF_OD_API_INPUT_SIZE);
 
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TF_OD_API_MODEL_FILE = "best-fp16.tflite";
 
-    private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco.txt";
+    private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/classes.txt";
 
     // Minimum detection confidence to track a detection.
     private static final boolean MAINTAIN_ASPECT = true;
