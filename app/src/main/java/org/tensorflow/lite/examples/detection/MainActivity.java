@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             }).start();
 
         });
-        this.sourceBitmap = Utils.getBitmapFromAsset(MainActivity.this, "damage.jpg");
+        this.sourceBitmap = Utils.getBitmapFromAsset(MainActivity.this, "th.webp");
 
         this.cropBitmap = Utils.processBitmap(sourceBitmap, TF_OD_API_INPUT_SIZE);
 

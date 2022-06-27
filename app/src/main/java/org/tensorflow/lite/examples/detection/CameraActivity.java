@@ -95,8 +95,8 @@ public abstract class CameraActivity extends AppCompatActivity
   private byte[][] yuvBytes = new byte[3][];
   private int[] rgbBytes = null;
   private int yRowStride;
-  protected int defaultModelIndex = 0;
-  protected int defaultDeviceIndex = 0;
+  protected int defaultModelIndex = 1;
+  protected int defaultDeviceIndex = 1;
   private Runnable postInferenceCallback;
   private Runnable imageConverter;
   protected ArrayList<String> modelStrings = new ArrayList<String>();
@@ -116,7 +116,7 @@ public abstract class CameraActivity extends AppCompatActivity
   /** Current indices of device and model. */
   int currentDevice = -1;
   int currentModel = -1;
-  int currentNumThreads = -1;
+  int currentNumThreads = 4;
 
   ArrayList<String> deviceStrings = new ArrayList<String>();
 
