@@ -8,6 +8,8 @@
 /build
 /captures
 .externalNativeBuild
+/app/src/main/assets/best-fp16-yolov5m.tflite
+/app/src/main/assets/best-fp16.tflite
 
 /.gradle/
 /.idea/

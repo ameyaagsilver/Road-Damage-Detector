@@ -118,6 +118,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     private BorderedText borderedText;
 
+    private final String[] classNames = new String[] {"Longitudinal crack", "Construction joint mark", "Lateral crack", "Construction joint mark", "Alligator crack", "Cross walk blur", "Pothole", "White line blur", "Potholes/Circular cracks"};
 
 
     @Override
@@ -259,6 +260,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         if (result.getConfidence() > 0.5) {
             Map<String, Object> damage = new HashMap<>();
             damage.put("Label", result.getDetectedClass());
+            damage.put("Title", result.getTitle());
+            damage.put("Damage", classNames[(result.getDetectedClass())]);
             damage.put("Confidence", 100 * result.getConfidence());
 
             try {

@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final boolean TF_OD_API_IS_QUANTIZED = false;
 
-    private static final String TF_OD_API_MODEL_FILE = "best-fp16.tflite";
+    private static final String TF_OD_API_MODEL_FILE = "best-fp16-yolov5m.tflite";
 
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/classes.txt";
 
